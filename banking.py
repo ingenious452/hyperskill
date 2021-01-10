@@ -4,16 +4,15 @@ import sqlite3
 
 #-------------------------------Card class--------------------------------
 class Card:
-
     BIN = str(400000)    # Band ID default for all the cards
+
 
     def __init__(self, account_identifier):
         self.account_identifier = account_identifier
         self.card_number = None
         self.card_password = None
-
-
         self.create_card()  # Create card initial value
+
 
     # Validate the card number using Luhn algorithm
     def card_validator(self, card_15_digits):
@@ -28,6 +27,7 @@ class Card:
             if (sum(less_than_9) + i) % 10 == 0:
                 return str(i)
 
+
     def create_card(self):
         """Set the value for card attribute
             card_number = number validated using mod 10 algorithm
@@ -41,8 +41,9 @@ class Card:
 
 #-----------------------------Account class------------------------------------------------------------
 class Account:
+    # Default menu option for accounts
+    OPTIONS = ['1. Balance', '2. Add income', '3. Do transfer', '4. Close account', '5. Log out', '0. Exit']
 
-    OPTIONS = ['1. Balance', '2. Add income', '3. Do transfer', '4. Close account', '5. Log out', '0. Exit']   # Default menu option for accounts
 
     def __init__(self, database_object):
         self.account_identifier = str(random.randint(100000000, 999999999))
@@ -50,51 +51,40 @@ class Account:
         self.database_handler = database_object
 
 
-    def card_validator(self, card_number):
-        # taking first fifteen numbers
-
+    def is_valid_card(self, card_number):
+        """check if reciever card number is valid according to Luhn algorithm"""
         odd_index = [int(card_number[i]) * 2 if (i + 1) % 2 != 0 else int(card_number[i])
-                     for i in range(len(card_number[:15]))]
-        # Subtract 9 if the number is > 9
+                     for i in range(len(card_number[:15]))]     # multiply by 2 all odd indexed numbers
+        # Subtract 9 if the number is > 9 in odd_index list
         less_than_9 = [num - 9 if num > 9 else num for num in odd_index]
+
         if (sum(less_than_9) + int(card_number[-1])) % 10 == 0:
-            return True
+            return True # if card is valid according to Luhn algorithm
         else:
             return False
 
 
-    def transfer(self, user_card_num, user_card_pass):
-        is_transfered = False
+    def make_transfer(self, sender_card_number):
+        """Transfer money from one account to another"""
+        print('Enter card number: ')
+        receiver_card_number = input()
 
-        print('\nTransfer')
-        print('Enter card number')
-        to = input()
-
-        if user_card_num == to:
-            print("You cant't transfer money to the same account\n")
-        elif self.card_validator(to):
-
-            if self.database_handler.valid_account('id', to) :
+        if sender_card_number == receiver_card_number:
+            print('You cant\'t transfer money to the same account\n')
+        elif self.is_valid_card(receiver_card_number):
+            if self.database_handler.get_card(receiver_card_number):
                 print('Enter how much money you want to transfer: ')
                 amount = int(input())
-
-                if amount >  self.database_handler.retrieve('balance',user_card_num, user_card_pass):
+                if amount > self.database_handler.get_balance(sender_card_number):
                     print('Not enough money!\n')
                 else:
-                    sender_balance = self.database_handler.valid_account('balance', user_card_num)
-                    receiver_balance = self.database_handler.valid_account('balance', to)
-                    new_balance = sender_balance - amount
-
-                    self.database_handler.transaction(new_balance, user_card_num)
-                    self.database_handler.update_balance(receiver_balance + amount, to)
+                    self.database_handler.update_balance(amount, sender_card_number, True)
+                    self.database_handler.update_balance(amount, receiver_card_number)
                     print('Success!\n')
             else:
                 print('Such a card does not exist.\n')
         else:
             print('Probably you made a mistake in the card number. Please try again!\n')
-
-
-
 
 
     def display_menu(self):
@@ -103,30 +93,34 @@ class Account:
             print(option)
 
 
-    def account_handler(self, card_num, card_pass):
+    def account_handler(self, card_number):
         """Handle the user choice with conditonal set flag
             has_exited = True
             if user exit without logging out"""
 
         has_exited = False    # flag
-
         while True:
             self.display_menu()
-            user_choice = int(input())
+            try:
+                user_choice = int(input())
+            except ValueError:
+                print('Invalid input')
+                continue
 
             if user_choice == 1:
-                self.balance = self.database_handler.retrieve('balance', card_num, card_pass)
+                self.balance = self.database_handler.get_balance(card_number)
                 print(f'\nBalance: {self.balance}\n')
             elif user_choice == 2:
-                print('Enter inome: ')
+                print('\nEnter income: ')
                 income = int(input())
-                # Update the balance value in the database
-                self.database_handler.update_balance(income, card_num)
+                self.database_handler.update_balance(income, card_number)
                 print('\nIncome was added!\n')
+
             elif user_choice == 3:
-                self.transfer(card_num, card_pass)
+                print('\nTransfer')
+                self.make_transfer(card_number)
             elif user_choice == 4:
-                self.database_handler.delete_account(card_num)
+                self.database_handler.delete_account(card_number)
                 print('\nThe account has been closed!\n')
             elif user_choice == 5:
                 print('\nYou have successfully logged out!\n')
@@ -135,7 +129,7 @@ class Account:
                 has_exited = True
                 break
 
-        return has_exited
+        return has_exited   # return the exit flag
 #--------------------------------------------------------------------------------------------------
 
 
@@ -149,13 +143,13 @@ class DatabaseHandler:
         """Create table when object is created"""
         self.create_table()
 
+
     def create_table(self):
         """Create a table card"""
-
         connection = DatabaseHandler.CONNECTION
         cursor = connection.cursor()
         cursor.execute('CREATE TABLE IF NOT EXISTS card('
-                       'id INTEGER,'
+                       'id INTEGER'
                        'number TEXT,'
                        'pin TEXT,'
                        'balance INTEGER);')
@@ -163,7 +157,7 @@ class DatabaseHandler:
         connection.commit()
 
 
-    def delete(self):
+    def delete_table(self):
         """Delete the table:-> card"""
         connection = DatabaseHandler.CONNECTION
         cursor = connection.cursor()
@@ -171,69 +165,74 @@ class DatabaseHandler:
 
         connection.commit()
 
-    def delete_account(self, card_num):
+
+    def delete_account(self, card_number):
         connection = DatabaseHandler.CONNECTION
         cursor = connection.cursor()
-        cursor.execute(f'DELETE FROM card where number = {card_num}')
-
+        cursor.execute('DELETE FROM card where number = ?', (card_number,))
         connection.commit()
 
 
-    def transaction(self, amount, card_num):
-
+    def get_balance(self, card_number):
+        """Retrieve the user account balance"""
         connection = DatabaseHandler.CONNECTION
         cursor = connection.cursor()
-        cursor.execute(f'UPDATE card SET balance = {amount} WHERE number = {card_num} ')
-        connection.commit()
+        cursor.execute('SELECT balance FROM card WHERE number = ?', (card_number,))
+        try:
+            return cursor.fetchone()[0]
+        except TypeError:
+            return None
 
-    def update_balance(self, amount, card_num):
 
+    def update_balance(self, amount, card_number, deduct=False):
+        """Update the account balance"""
         connection = DatabaseHandler.CONNECTION
         cursor = connection.cursor()
-        cursor.execute(f'SELECT balance FROM card WHERE number = {card_num}')
-
-        previous_balance = cursor.fetchone()[0]
-        new_balance = previous_balance + amount
-
-        cursor.execute(f'UPDATE card SET balance = {new_balance} WHERE number = {card_num} ')
+        # retrieve the previously store balance instead of directly putting amount as new balance
+        previous_balance = self.get_balance(card_number)
+        # change balance based on flag
+        if deduct:
+            current_balance = previous_balance - amount
+        else:
+            current_balance = previous_balance + amount
+        cursor.execute('UPDATE card SET balance = ? WHERE number = ? ', (current_balance, card_number))
         connection.commit()
+
+
+    def get_card(self, card_number):
+        """Check wether the card_number exist in database"""
+        connection = DatabaseHandler.CONNECTION
+        cursor = connection.cursor()
+        cursor.execute('SELECT id FROM card WHERE number = ?', (card_number,))
+        try:
+            values = cursor.fetchone()[0]
+            return True
+        except TypeError:
+            return None
+
 
 
     def update_table(self, card_number, card_password, account_balance):
         """Update the database table card"""
-
         DatabaseHandler.USER_COUNT += 1
         connection = DatabaseHandler.CONNECTION
-
         cursor = connection.cursor()
-        cursor.execute(f'INSERT INTO card(id, number, pin, balance)'
-                       f' VALUES({DatabaseHandler.USER_COUNT}, {card_number}, {card_password}, {account_balance})')
-
+        cursor.execute('INSERT INTO card(id, number, pin, balance) VALUES(?, ?, ?, ?)',
+                       (DatabaseHandler.USER_COUNT, card_number, card_password, account_balance))
         connection.commit()
 
 
-    def valid_account(self, attribute, card_number):
-        connection = DatabaseHandler.CONNECTION
-        cursor = connection.cursor()
-        cursor.execute(f'SELECT {attribute} FROM card WHERE number = {str(card_number)}')
-        try:
-            return cursor.fetchone()[0]
-        except TypeError:
-            return None
-
-
-    def retrieve(self, attribute, card_number, card_password):
+    def login(self, card_number, card_password):
         """Retrieve the given attribute from card table"""
-
         connection = DatabaseHandler.CONNECTION
         cursor = connection.cursor()
-        cursor.execute(f'SELECT {attribute} FROM card '
-                       f'WHERE number = {str(card_number)} AND pin = {str(card_password)}')
+        cursor.execute('SELECT id FROM card WHERE number = ? AND pin = ?',
+                       (card_number, card_password))
 
-        try:
-            return cursor.fetchone()[0]
-        except TypeError:
-            return None
+        if cursor.fetchone():
+            return True
+        else:
+            return False
 #------------------------------------------------------------------------------------------------------
 
 
@@ -261,22 +260,19 @@ class Bank:
 
     def create_account(self):
         """Create account and card objects, update database"""
-
         account = Account(Bank.database_handler)     # create account object and pass the 9 digits random
                                                                     # account identifier
         card = self.issue_card(account.account_identifier)
         # Update table with new account card details
         Bank.database_handler.update_table(card.card_number, card.card_password, account.balance)
-
         return account
 
 
-    def account_login(self, card_number, card_password, account_object): # int, int, object
+    def account_login(self, card_number, card_password, account_object):
         """Check if the creditentials are correct using database"""
-
-        if Bank.database_handler.retrieve('id', card_number, card_password):
+        if Bank.database_handler.login(card_number, card_password):
             print('\nYou have successfully logged in!\n')
-            return account_object.account_handler(card_number, card_password)
+            return account_object.account_handler(card_number)
         else:
             print('\nWrong card number or PIN!\n')
             return False
@@ -284,16 +280,13 @@ class Bank:
 
     def display_main_screen(self):
         """Display option on screen"""
-
         for option in Bank.OPTIONS:
             print(option)
 
 
     def user_handler(self):
         """Provide interface to user with choices"""
-
         account_object = None
-
         while True:
             self.display_main_screen()
             user_choice = int(input())
