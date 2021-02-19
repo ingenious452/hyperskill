@@ -1,0 +1,44 @@
+[30mNavigation[30mindex
+modules
+|
+Python
+»
+3.9.2rc1 Documentation
+»
+|[34mindex[34mmodules[34mPython[34m3.9.2rc1 Documentation[30mPython 3.9.2rc1 documentation[30mWelcome! This is the documentation for Python 3.9.2rc1.[30mParts of the documentation:[30mWhat's new in Python 3.9?
+or
+all "What's new" documents
+since 2.0[34mWhat's new in Python 3.9?[34mall "What's new" documents[30mTutorial
+start here[34mTutorial[30mLibrary Reference
+keep this under your pillow[34mLibrary Reference[30mLanguage Reference
+describes syntax and language elements[34mLanguage Reference[30mPython Setup and Usage
+how to use Python on different platforms[34mPython Setup and Usage[30mPython HOWTOs
+in-depth documents on specific topics[34mPython HOWTOs[30mInstalling Python Modules
+installing from the Python Package Index & other sources[34mInstalling Python Modules[30mDistributing Python Modules
+publishing modules for installation by others[34mDistributing Python Modules[30mExtending and Embedding
+tutorial for C/C++ programmers[34mExtending and Embedding[30mPython/C API
+reference for C/C++ programmers[34mPython/C API[30mFAQs
+frequently asked questions (with answers!)[34mFAQs[30mIndices and tables:[30mGlobal Module Index
+quick access to all modules[34mGlobal Module Index[30mGeneral Index
+all functions, classes, terms[34mGeneral Index[30mGlossary
+the most important terms explained[34mGlossary[30mSearch page
+search this documentation[34mSearch page[30mComplete Table of Contents
+lists all sections and subsections[34mComplete Table of Contents[30mMeta information:[30mReporting bugs[34mReporting bugs[30mContributing to Docs[34mContributing to Docs[30mAbout the documentation[34mAbout the documentation[30mHistory and License of Python[34mHistory and License of Python[30mCopyright[34mCopyright[30mDownload[30mDownload these documents[34mDownload these documents[30mDocs by version[30mPython 3.10 (in development)
+Python 3.9 (stable)
+Python 3.8 (stable)
+Python 3.7 (security-fixes)
+Python 3.6 (security-fixes)
+Python 3.5 (EOL)
+Python 2.7 (EOL)
+All versions[34mPython 3.10 (in development)[34mPython 3.9 (stable)[34mPython 3.8 (stable)[34mPython 3.7 (security-fixes)[34mPython 3.6 (security-fixes)[34mPython 3.5 (EOL)[34mPython 2.7 (EOL)[34mAll versions[30mOther resources[30mPEP Index
+Beginner's Guide
+Book List
+Audio/Visual Talks
+Python Developer’s Guide[34mPEP Index[34mBeginner's Guide[34mBook List[34mAudio/Visual Talks[34mPython Developer’s Guide[30mNavigation[30mindex
+modules
+|
+Python
+»
+3.9.2rc1 Documentation
+»
+|[34mindex[34mmodules[34mPython[34m3.9.2rc1 Documentation[34mCopyright[34mPlease donate.[34mFound a bug[34mSphinx
