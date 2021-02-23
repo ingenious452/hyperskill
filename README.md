@@ -15,4 +15,12 @@ Read through a login file send the login to server for verification if the passw
  Hey, This one is a simple banking system using python and sqlite database.
  This is the first project using oops cocept for me. 
  
+ - ## Tic Tac Toe 
+ Simple Tic Tac Toe Game using python
+ 
+ - ## Coffee Machine
+ Coffe Machine using OOP concept and single interface method for all input to perform operation.
+ 
+ 
  thank you.
+
