@@ -1,3 +1,11 @@
+# Hyperskill Projects
+
+
+## browser
+
+Simple text based browser request the page from the site, extract text from the response html using Beautiful soup and store it in a given directory.
+uses stack to navigate history of visited sites.
+
 # banking_system
 :tada: Welcome :tada:
 
